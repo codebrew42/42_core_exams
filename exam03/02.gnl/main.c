@@ -120,11 +120,14 @@ void	handle_error(int flag)
 
 void	update_stash(char **s)
 {
-	char *p = ft_strchr((char *)s, '\n');
+	char *p = ft_strchr(*s, '\n');
 	if (!p)
-		*s = NULL;
+		*s += ft_strlen(*s);
 	else
-		*s = p + 1;
+	{
+		while (*s != p)
+			(*s)++;
+	}
 }
 
 char	*get_single_line(const char *s)
