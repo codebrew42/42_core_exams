@@ -9,12 +9,20 @@ I did not copy the actual subject. But it did go along the line
 #include <fcntl.h>
 #define BF_SIZE 1024
 
+char	*handle_error2(int i, char *s1, char *s2);
 int		handle_error(int i, char *s1, char *s2);
 void	*ft_memcopy(void *dest, const void *src, size_t n);
 void	*ft_memmove(void *dest, const void *src, size_t n);
 size_t	ft_strlen(char *s);
 char	*ft_strchr(char *s, int c);
 int		str_append_mem(char **s1, char *s2, size_t size2);
+
+char	*handle_error2(int i, char *s1, char *s2)
+{
+	handle_error(i, s1, s2);
+	return (NULL);
+}
+
 
 int	handle_error(int i, char *s1, char *s2)
 {
@@ -25,19 +33,16 @@ int	handle_error(int i, char *s1, char *s2)
 		if (s2)
 			free(s2);
 		fprintf(stderr, "malloc failed");
-		return (1);
 	}
 	else if (i == 1)
 	{
 		perror("read failed\n");
-		return (1);
 	}
 	else if (i == 2)
 	{
 		printf("Error: str_append_mem failed\n");
-		return (1);
 	}
-	return (0);
+	return (1);
 }
 //ok
 void	*ft_memcopy(void *dest, const void *src, size_t n)
@@ -114,67 +119,41 @@ char	*ft_strchr(char *s, int c)
 	return (NULL);
 }
 
-//append s2 to s1 (concatenate)
-//fixed
-int	str_append_mem(char **s1, char *s2, size_t size2)
+char	*update_stash(char *s)
 {
-	size_t	size1;
-	char	*tmp;
-
-	size1 = ft_strlen(*s1);
-	tmp = malloc(size2 + size1 + 1);
-	if (!tmp)
-		return (handle_error(0, NULL, NULL));
-	if (*s1)
-		ft_memcopy(tmp, *s1, size1);
-	if (*s2)
-		ft_memcopy(tmp + size1, s2, size2);
-	tmp[size1 + size2] = '\0';
-	*s1 = tmp;
-	return (0);
+	while (!ft_strchr(s, '\n') && s)
+		s++;
+	return (s);
 }
 
 char	*get_next_line(int fd)
 {
-	char			tmp;
 	char			*buff;
-	static char		*ret;
+	static char		*stash;
+	char			*ret = NULL;
 	int				new_bytes_read;
 	int				total_read;
 
 //	tmp = ft_strchr(b, '\n');
 	buff = malloc(BF_SIZE + 1);
 	if (!buff)
-	{
-		handle_error(0, buff, NULL);
-		return (NULL);
-	}
-		total_read = 0;
-	while (!tmp)
+		return (handle_error2(0, buff, NULL));
+	total_read = 0;
+	while (1)
 	{
 		new_bytes_read = read(fd, buff, BF_SIZE);
 		if (new_bytes_read == -1)
-		{
-			handle_error(1, buff, NULL);
-			return (NULL);
-		}
+			return (handle_error2(1, buff, NULL));
 		else if (!new_bytes_read)
 			break ;
+		buff[new_bytes_read] = '\0';
 		ret = realloc(ret, total_read + new_bytes_read + 1);
-		if (!ret)
-		{
-			handle_error(0, buff, NULL);
-			return (NULL);
-		}
-		if (str_append_mem(ret + total_read, buff, new_bytes_read))
-			exit (handle_error(2, buff, ret));
+		if (!ret || !ft_memmove(ret + total_read, buff, new_bytes_read))
+			return (handle_error2(0, buff, NULL));
 		total_read += new_bytes_read;
+		stash = update_stash(ret);
 		if (ft_strchr(ret, '\n'))
-		{
 			break ;
-			//update stash(ret should be next position of \n)
-			//break;
-		}
 	}
 	buff[total_read] = '\0';
 	return (ret);
@@ -201,33 +180,7 @@ int	main(int ac, char **av)
 		line = get_next_line(fd);
 		if (!line)
 			break ;
+		printf("%s", line);
 	}
-	printf("* * *debugging point* * *\n");
 	return (0);
 }
-
-/*
-
-int	main()
-{
-	//check str_append_mem
-	char	*s1;
-	char	*s2;
-	int		res;
-
-	s1 = "hi ";
-	s2 = "jieun ";
-	res = str_append_mem(&s1, s2, 6);
-	if (res)
-		printf("str_append_mem: failed\n");
-	else
-		printf("res : [%s]\n", s1);
-	free(s1);
-}
-
-int	str_append_str(char **s1, char *s2)
-{
-	return str_append_mem(s1, s2, ft_strlen(s2));
-}
-
-*/
