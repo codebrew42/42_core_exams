@@ -1,0 +1,3 @@
+1st line: hi
+2nd line: my name is Jin
+3rd line: then newline
