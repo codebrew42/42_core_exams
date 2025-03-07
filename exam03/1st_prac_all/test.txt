@@ -1,5 +1,11 @@
+<<<<<<< HEAD
 1: hi
 2: my name is
 3: jin
 4: next blank
+=======
+1st_line: hi
+2nd_line
+3rd_line: next just newline
+>>>>>>> 54ca5778398a7a9d8a0006837562d1a36023098c
 
