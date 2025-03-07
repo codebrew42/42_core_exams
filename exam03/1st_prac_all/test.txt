@@ -1,0 +1,4 @@
+1st_line: hi
+2nd_line
+3rd_line: next just newline
+
