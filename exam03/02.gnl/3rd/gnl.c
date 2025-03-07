@@ -3,8 +3,31 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
-#define BUFF_SIZE 1
+//#define BUFF_SIZE 1
 
+void	ft_memmove(char *dst, char *src, size_t len)
+{
+	if (!src || !dst)
+		return ;
+	size_t i = 0;
+	if (src + len > dst)
+	{
+		while (src[--len])
+		{
+			dst[len] = src[len];
+		}
+	}
+	else
+	{
+		while (src[i])
+		{
+			dst[i] = src[i];
+			i++;
+		}
+	}
+	dst[len] = 0; //!
+	return;
+}
 
 char *extract_line(char **s)
 {
@@ -20,8 +43,8 @@ char *extract_line(char **s)
 	char *dest = malloc(dest_len + 1);
 	if (!dest)
 		return (NULL);
-	memmove(dest, *s, dest_len);
-
+	ft_memmove(dest, *s, dest_len);
+	dest[dest_len] = 0; //
 	//update stash
 	if (!newline_pos)
 	{
@@ -34,6 +57,7 @@ char *extract_line(char **s)
 			*s += 1;
 		*s += 1;
 	}
+	
 	return (dest);
 }
 
@@ -67,12 +91,12 @@ int	join_free(char **s1, char *s2)
 		return (1);
 	}
 	if (*s1)
-		memmove(ret, *s1, len_s1);
+		ft_memmove(ret, *s1, len_s1);
 	if (s2)
-		memmove(ret+ len_s1, s2, len_s2);
+		ft_memmove(ret+ len_s1, s2, len_s2);
 	ret[len_s1+len_s2] = 0;
 	*s1 = ret;
-//	free(s2);
+	free(s2);  //!: free bf
 	return (0);
 }
 
@@ -101,36 +125,37 @@ int	main()
 
 char	*gnl(int fd)
 {
+	if (fd < 0 || BUFF_SIZE <= 0)
+		return (NULL);
+	if (stash && strchr(stash, '\n')) //difficult
+		return (extract_line(&stash));
+
 	char *buff = malloc (BUFF_SIZE + 1);
 	if (!buff)
 		return (NULL);
+
 	static char		*stash;
 	int				bytes_read;
-
 	while (1)
 	{
 		bytes_read = read(fd, buff, BUFF_SIZE);
 		if (bytes_read < 0)
 		{
-//			if (stash)
-//				free(stash);
-//			free(buff);
+			if (stash)
+				free(stash);
+			free(buff);
 			return (NULL);
 		}
-		else if (bytes_read > 0)
+		else if (!bytes_read)
+			break ;
+		buff[bytes_read] = 0; //!
+		if (join_free(&stash, buff))
 		{
-			if (join_free(&stash, buff))
-			{
-//				free(stash);
-				return (NULL);
-			}
+			free(stash);
+			return (NULL);
 		}
-		if (!bytes_read || (stash && strchr(stash, '\n'))) //difficult
-		{
-//			printf("gnl's stash[%s]\n",stash);
-			return (extract_line(&stash));
-		}
-
+		if (strchr(stash, '\n'))
+			break ;
 	}
 	return (NULL);
 }
@@ -148,9 +173,9 @@ int		main(int ac, char **av)
 	while (1)
 	{
 		line = gnl(fd);
-		printf("line[%d]:%s", i, line);
 		if (!line)
 			break ;
+		printf("%s",line);
 		free(line);
 		i++;
 	}

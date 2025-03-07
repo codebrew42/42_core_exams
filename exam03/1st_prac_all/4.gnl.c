@@ -6,6 +6,45 @@
 #define BF_SIZE 1
 
 
+char	*ft_memmove(char *dst, char *src, int src_len)
+{
+	if (!dst)
+		return (NULL);
+	if (!src || src_len == 0)
+		return (NULL);
+
+	int cp_src_len = src_len;
+	if (src + src_len > dst)
+	{
+		while (src[--src_len])
+			dst[src_len] = src[src_len];
+	}
+	else
+	{
+		int i = -1;
+		while(++i < src_len)
+			dst[i] = src[i];
+	}
+	dst[src_len] = 0;
+	return (dst);
+}
+
+
+char	*join_free(char *s, char *b)
+{
+	int	line_len = strlen(b);
+	if(s)
+		line_len += strlen(s);
+	char	*dest = malloc(line_len+1);
+	if (!dest)
+		return (NULL);
+	if (s)
+		ft_memmove(dest, s, strlen(s));
+	ft_memmove(dest + strlen(s), b, strlen(b));
+	dest[line_len] = 0;
+	return (dest);
+}
+
 char	*ft_strchr(char *s, char c)
 {
 	while (*s != c && *s)
@@ -17,38 +56,40 @@ char	*ft_strchr(char *s, char c)
 
 char	*extract_line(char **s)
 {
+	int line_len;
 	if (!s || !*s)
 		return (NULL);
 	char	*newline_pos = ft_strchr(*s, '\n');
 
 	//copy line
 	if (!newline_pos)
-		int		line_len = strlen(s);
+		line_len = strlen(*s);
 	else
-		int		line_len = newline_pos - *s + 1;
+		line_len = newline_pos - *s + 1;
 	char *dest = malloc(line_len + 1);
 	if (!dest)
 		return (NULL);
-	memmove(dest, s, line_len);
+	ft_memmove(dest, *s, line_len);
 	dest[line_len] = 0; 
 
 	//update stash
 	while (*s != newline_pos)
-		*s++;
+		(*s)++;
+	(*s)++;
 	return (dest);
 }
 
 char	*gnl(int fd)
 {
 	//er_ret: fd<0, buff_size=0
-	if (fd < 0 || BF_SIZE == 0)
+	if (fd < 0 || BF_SIZE <= 0)
 		return (NULL);
 
 	//if (stash contains \n) {ret (extract_line($stash)}
 	static char	*stash;
-
-	if (ft_strchr(stash, '\n')
-		return (extract_line(&stash);
+	int		bytes_read;
+	if (ft_strchr(stash, '\n'))
+		return (extract_line(&stash));
 
 	//loop: if (stash doesn't contain \n) {read(fd, buff, BF_SIZE)}
 	char *buff = malloc(BF_SIZE + 1);
@@ -57,7 +98,7 @@ char	*gnl(int fd)
 
 	while (!ft_strchr(stash, '\n'))
 	{
-		int bytes_read = read(fd, buff, BF_SIZE);
+		bytes_read = read(fd, buff, BF_SIZE);
 		//err: if(bytes_read < 0)
 		if (bytes_read < 0)
 		{
@@ -77,13 +118,12 @@ char	*gnl(int fd)
 			free(buff);
 			break;
 		}
-
 	}
 
-
-
 	//if (bytes_read=0 & !stash) {ret NULL}
-
+	if (!bytes_read && !stash)
+		return (NULL);
+	return (extract_line(&stash));
 }
 
 int	main(int ac, char **av)
