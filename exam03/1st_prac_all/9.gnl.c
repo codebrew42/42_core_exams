@@ -84,7 +84,7 @@ char	*extract_line(char **s)
 	{
 //		newline_pos++; //wrong: can causes invalid mem access
 		char *new_stash = malloc(line_len+1);
-		new_stash = strdup(newline_pos + 1);	
+		new_stash = strdup(newline_pos + 1);
 
 //		char *new_stash = strdup(newline_pos);
 		free(*s);

@@ -120,9 +120,7 @@ char	*gnl(int fd)
 	static char	*stash;
 	int		bytes_read;
 	char		*buff;
-	if (stash && ft_strchr(stash, '\n'))
-		return (extract_line(&stash));
-
+b
 	//loop: if (stash doesn't contain \n) {read(fd, buff, BF_SIZE)}
 	while (!ft_strchr(stash, '\n'))
 	{
