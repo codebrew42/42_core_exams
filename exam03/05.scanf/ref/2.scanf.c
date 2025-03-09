@@ -2,9 +2,6 @@
 # include <unistd.h>
 # include <stdarg.h>
 # include <ctype.h>
-#define BUFFER_SIZE 3
-int	ft_scanf(const char *format, ...);
-
 
 static void	skip_whitespace(void)
 {
@@ -24,9 +21,7 @@ static int	handle_str(char *str)
 	i = 0;
 	skip_whitespace();
 	while ((c = fgetc(stdin)) != EOF && !isspace(c))
-	{
 		str[i++] = c;
-	}
 	if (i == 0)
 		return (0);
 	str[i] = '\0';
@@ -101,8 +96,7 @@ int	ft_scanf(const char *format, ...)
 		}
 		else
 		{
-			c_in = fgetc(stdin);
-			if (c_in != *format)
+			if ((c_in = fgetc(stdin)) != *format)
 			{
 				ungetc(c_in, stdin);
 				break ;
@@ -114,20 +108,39 @@ int	ft_scanf(const char *format, ...)
 	return (count);
 }
 
+/*
+[res1](base) jieunpark@eng---macbook ref % ./scanf 
+Enter c1 and c2:j hihihi l
+Result of scanf; c1[j], c2[l]%
+(base) jieunpark@eng---macbook ref % ./scanf
+Enter c1 and c2: k ;
+reading two characters failed%
+
+[res2]
+(base) jieunpark@eng---macbook ref % ./scanf
+Enter Name and Age:jieun hihihi 30
+Result of scanf; Name[jieun], Age[30]%     
+*/
 int main(void)
 {
-	// char name[100];
-	// int age;
-	// printf("Enter Name and Age:");
-	// int res = ft_scanf("%s hihihi %d", name, &age);
+//	[res1]
+	char name[100];
+	int age;
+	printf("Enter Name and Age:");
+	int res = ft_scanf("%s hihihi %d", name, &age);
 
-	// printf("Result of scanf; Name[%s], Age[%d]", name, age);
+	printf("Result of scanf; Name[%s], Age[%d]", name, age);
+
+// [res2]
 	char c1;
 	char c2;
 	int age;
 	printf("Enter c1 and c2:");
 	int res = ft_scanf("%c hihihi %c", &c1, &c2);
 
-	printf("Result of scanf; c1[%c], c2[%c]", c1, c2);
+	if (res == 2)
+		printf("Result of scanf; c1[%c], c2[%c]", c1, c2);
+	else
+		printf("reading two characters failed");
 	return (0);
 }
